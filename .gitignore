@@ -1,3 +1,4 @@
 checkpoints**
 datasets/kitti/training**
 datasets/kitti/testing**
+**/__pycache__/**
