@@ -3,7 +3,7 @@ conda create -n sne python=3.7.0
 conda install cudatoolkit=10.0
 conda install cundnn=7
 
-pip install matplotlib tqdm tensorboardX torchsummary
+pip install matplotlib=3.0.0 tqdm tensorboardX torchsummary
 pip install numpy opencv-python==3.4.3.18 Pillow==5.3.0
 pip install http://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-linux_x86_64.whl
 pip install torchvision==0.2.1 torchfile==0.1.0 torchnet

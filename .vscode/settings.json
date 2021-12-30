@@ -1,0 +1,4 @@
+{
+    "python.defaultInterpreterPath": "/home/y1/anaconda3/envs/sne/bin/python ",
+    "ros.distro": "kinetic",
+}
