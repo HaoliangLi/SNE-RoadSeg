@@ -3,3 +3,5 @@ datasets/kitti/training**
 datasets/kitti/testing**
 **/__pycache__/**
 testresults**
+datasets/kitti/validation**
+runs/**
