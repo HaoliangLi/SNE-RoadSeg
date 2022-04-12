@@ -8,9 +8,9 @@ from data.base_dataset import BaseDataset
 from models.sne_model import SNE
 
 
-class kittiCalibInfo():
+class rtksCalibInfo():
     """
-    Read calibration files in the kitti dataset,
+    Read calibration files in the rtks dataset,
     we need to use the intrinsic parameter of the cam2
     """
     def __init__(self, filepath):
@@ -62,8 +62,8 @@ class kittiCalibInfo():
         return data
 
 
-class kittidataset(BaseDataset):
-    """dataloader for kitti dataset"""
+class rtksdataset(BaseDataset):
+    """dataloader for rtks dataset"""
     @staticmethod
     def modify_commandline_options(parser, is_train):
         return parser
@@ -73,34 +73,35 @@ class kittidataset(BaseDataset):
         self.batch_size = opt.batch_size
         self.root = opt.dataroot # path for the dataset
         self.use_sne = opt.use_sne
-        self.num_labels = 2
+        self.num_labels = 13
         self.use_size = (opt.useWidth, opt.useHeight)
         if self.use_sne:
             self.sne_model = SNE()
 
         if opt.phase == "train":
-            self.image_list = sorted(glob.glob(os.path.join(self.root, 'training', 'image_2', '*.png')))
+            self.image_list = sorted(glob.glob(os.path.join(self.root, 'training', 'images', '*.png')))
         elif opt.phase == "val":
-            self.image_list = sorted(glob.glob(os.path.join(self.root, 'validation', 'image_2', '*.png')))
+            self.image_list = sorted(glob.glob(os.path.join(self.root, 'validation', 'images', '*.png')))
         else:
-            self.image_list = sorted(glob.glob(os.path.join(self.root, 'testing', 'image_2', '*.png')))
+            self.image_list = sorted(glob.glob(os.path.join(self.root, 'testing', 'images', '*.png')))
 
     def __getitem__(self, index):
         useDir = "/".join(self.image_list[index].split('/')[:-2])
         name = self.image_list[index].split('/')[-1]
 
-        rgb_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'image_2', name)), cv2.COLOR_BGR2RGB)
+        rgb_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'images', name)), cv2.COLOR_BGR2RGB)
         # depth_image = cv2.imread(os.path.join(useDir, 'depth_u16', name), cv2.IMREAD_ANYDEPTH)
-        another_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'image_inv', name[-13:])), cv2.COLOR_BGR2RGB)
+        another_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'images_inv', name)), cv2.COLOR_BGR2RGB)
         oriHeight, oriWidth, _ = rgb_image.shape
         if self.opt.phase == 'test' and self.opt.no_label:
             # Since we have no gt label (e.g., kitti submission), we generate pseudo gt labels to
             # avoid destroying the code architecture
             label = np.zeros((oriHeight, oriWidth), dtype=np.uint8)
         else:
-            label_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'gt_image_2', name[:-10]+'road_'+name[-10:])), cv2.COLOR_BGR2RGB)
-            label = np.zeros((oriHeight, oriWidth), dtype=np.uint8)
-            label[label_image[:,:,2] > 0] = 1
+            label_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'labels', name)), cv2.COLOR_BGR2RGB)
+            label = label_image[:, :, 0].astype(np.uint8)
+            # label = np.zeros((oriHeight, oriWidth), dtype=np.uint8)
+            # label[label_image[:,:,2] > 0] = 1
 
         # resize image to enable sizes divide 32
         rgb_image = cv2.resize(rgb_image, self.use_size)
@@ -120,7 +121,6 @@ class kittidataset(BaseDataset):
         #     another_image = cv2.resize(another_image, self.use_size)
         #     another_image = another_image[:,:,np.newaxis]
 
-        label[label > 0] = 1
         rgb_image = rgb_image.astype(np.float32) / 255
         another_image = another_image.astype(np.float32) / 255
 

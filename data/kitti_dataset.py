@@ -90,7 +90,8 @@ class kittidataset(BaseDataset):
         name = self.image_list[index].split('/')[-1]
 
         rgb_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'image_2', name)), cv2.COLOR_BGR2RGB)
-        depth_image = cv2.imread(os.path.join(useDir, 'depth_u16', name), cv2.IMREAD_ANYDEPTH)
+        # depth_image = cv2.imread(os.path.join(useDir, 'depth_u16', name), cv2.IMREAD_ANYDEPTH)
+        another_image = cv2.cvtColor(cv2.imread(os.path.join(useDir, 'image_inv', name[-13:])), cv2.COLOR_BGR2RGB)
         oriHeight, oriWidth, _ = rgb_image.shape
         if self.opt.phase == 'test' and self.opt.no_label:
             # Since we have no gt label (e.g., kitti submission), we generate pseudo gt labels to
@@ -103,23 +104,25 @@ class kittidataset(BaseDataset):
 
         # resize image to enable sizes divide 32
         rgb_image = cv2.resize(rgb_image, self.use_size)
+        another_image = cv2.resize(another_image, self.use_size)
         label = cv2.resize(label, self.use_size, interpolation=cv2.INTER_NEAREST)
 
         # another_image will be normal when using SNE, otherwise will be depth
-        if self.use_sne:
-            calib = kittiCalibInfo(os.path.join(useDir, 'calib', name[:-4]+'.txt'))
-            camParam = torch.tensor(calib.get_cam_param(), dtype=torch.float32)
-            normal = self.sne_model(torch.tensor(depth_image.astype(np.float32)/1000), camParam)
-            another_image = normal.cpu().numpy()
-            another_image = np.transpose(another_image, [1, 2, 0])
-            another_image = cv2.resize(another_image, self.use_size)
-        else:
-            another_image = depth_image.astype(np.float32)/65535
-            another_image = cv2.resize(another_image, self.use_size)
-            another_image = another_image[:,:,np.newaxis]
+        # if self.use_sne:
+        #     calib = kittiCalibInfo(os.path.join(useDir, 'calib', name[:-4]+'.txt'))
+        #     camParam = torch.tensor(calib.get_cam_param(), dtype=torch.float32)
+        #     normal = self.sne_model(torch.tensor(depth_image.astype(np.float32)/1000), camParam)
+        #     another_image = normal.cpu().numpy()
+        #     another_image = np.transpose(another_image, [1, 2, 0])
+        #     another_image = cv2.resize(another_image, self.use_size)
+        # else:
+        #     another_image = depth_image.astype(np.float32)/65535
+        #     another_image = cv2.resize(another_image, self.use_size)
+        #     another_image = another_image[:,:,np.newaxis]
 
         label[label > 0] = 1
         rgb_image = rgb_image.astype(np.float32) / 255
+        another_image = another_image.astype(np.float32) / 255
 
         rgb_image = transforms.ToTensor()(rgb_image)
         another_image = transforms.ToTensor()(another_image)

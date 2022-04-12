@@ -12,9 +12,9 @@ class BaseOptions():
 
     def initialize(self, parser):
         parser.add_argument('--dataroot', required=True, help='path to images, should have training, validation and testing')
-        parser.add_argument('--batch_size', type=int, default=2, help='input batch size')
-        parser.add_argument('--useWidth', type=int, default=1248, help='scale images to this width')
-        parser.add_argument('--useHeight', type=int, default=384, help='scale images to this height')
+        parser.add_argument('--batch_size', type=int, default=8, help='input batch size')
+        parser.add_argument('--useWidth', type=int, default=352, help='scale images to this width')
+        parser.add_argument('--useHeight', type=int, default=288, help='scale images to this height')
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
         parser.add_argument('--use_sne', action='store_true', help='chooses if using sne')
